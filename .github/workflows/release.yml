@@ -1,17 +1,35 @@
 name: Release
 
-# Push a tag like v0.1.0 to build self-contained executables for every platform and publish a GitHub Release.
-# "Run workflow" on the Actions tab builds the same packages as downloadable workflow artifacts without releasing.
+# On every push to main: if the <Version> in src/Holocene.Cli/Holocene.Cli.csproj has no GitHub Release yet,
+# build self-contained executables for every platform and publish release v<Version> (GitHub creates the tag).
+# To release, bump <Version> and push. "Run workflow" on the Actions tab does the same check by hand.
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      exists: ${{ steps.v.outputs.exists }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(grep -oP '(?<=<Version>)[^<]+' src/Holocene.Cli/Holocene.Cli.csproj)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if gh release view "v$version" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then echo "exists=true" >> "$GITHUB_OUTPUT"; else echo "exists=false" >> "$GITHUB_OUTPUT"; fi
+
   package:
+    needs: version
+    if: needs.version.outputs.exists == 'false'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -30,8 +48,7 @@ jobs:
           -o out/bin
       - name: Assemble package
         run: |
-          name=holocene-${GITHUB_REF_NAME#v}-${{ matrix.rid }}
-          [ "$GITHUB_REF_TYPE" = "tag" ] || name=holocene-dev-${{ matrix.rid }}
+          name=holocene-${{ needs.version.outputs.version }}-${{ matrix.rid }}
           mkdir -p "pkg/$name/data"
           cp out/bin/* "pkg/$name/"
           cp -r data/parameters.json data/earth data/validation "pkg/$name/data/"
@@ -46,8 +63,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    if: github.ref_type == 'tag'
-    needs: package
+    needs: [version, package]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -58,4 +74,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --title "Holocene $GITHUB_REF_NAME" --notes "Self-contained builds (no .NET install needed). Unpack and run \`holocene\` (Windows: holocene.exe) to open the world viewer; run \`holocene help\` for the simulation commands. macOS: if Gatekeeper blocks the unsigned binary, right-click it and choose Open, or run \`xattr -d com.apple.quarantine holocene\`."
+          tag="v${{ needs.version.outputs.version }}"
+          gh release create "$tag" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Holocene $tag" --notes "Self-contained builds (no .NET install needed). Unpack and run \`holocene\` (Windows: holocene.exe) to open the world viewer; run \`holocene help\` for the simulation commands. macOS: if Gatekeeper blocks the unsigned binary, right-click it and choose Open, or run \`xattr -d com.apple.quarantine holocene\`."

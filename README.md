@@ -37,7 +37,7 @@ it opens the world viewer in your browser with the bundled worlds for 10,000 BCE
 On macOS the binary isn't signed: if Gatekeeper blocks it, right-click → Open, or run
 `xattr -d com.apple.quarantine holocene`.
 
-Releases are built by GitHub Actions (`.github/workflows/release.yml`) whenever a `v*` tag is pushed.
+Releases are built by GitHub Actions (`.github/workflows/release.yml`): bump `<Version>` in `src/Holocene.Cli/Holocene.Cli.csproj` and push to `main`.
 
 ## Build from source
 
