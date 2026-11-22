@@ -1,0 +1,104 @@
+// Parameter registry (design principle 1). Every value has a unit, a kind and a source/justification.
+// kind: constant | empirical | numerical | tunable. Tunables must name their calibration target.
+{
+  "planet": {
+    "radius": { "value": 6.371e6, "unit": "m", "kind": "constant", "source": "IUGG mean Earth radius" },
+    "omega": { "value": 7.2921e-5, "unit": "1/s", "kind": "constant", "source": "Earth sidereal rotation rate" },
+    "gravity": { "value": 9.81, "unit": "m/s2", "kind": "constant", "source": "standard gravity" },
+    "solar_constant": { "value": 1361.0, "unit": "W/m2", "kind": "empirical", "source": "Kopp & Lean 2011, total solar irradiance at solar minimum" },
+    "surface_pressure": { "value": 101325, "unit": "Pa", "kind": "constant", "source": "standard atmosphere" }
+  },
+  "thermo": {
+    "cp_air": { "value": 1004.0, "unit": "J/kg/K", "kind": "constant", "source": "specific heat of dry air" },
+    "latent_vap": { "value": 2.5e6, "unit": "J/kg", "kind": "constant", "source": "latent heat of vaporization at 0 C" },
+    "latent_fus": { "value": 3.34e5, "unit": "J/kg", "kind": "constant", "source": "latent heat of fusion" },
+    "rho_air": { "value": 1.2, "unit": "kg/m3", "kind": "constant", "source": "near-surface air density" },
+    "rho_water": { "value": 1025.0, "unit": "kg/m3", "kind": "constant", "source": "seawater density" },
+    "cp_water": { "value": 3990.0, "unit": "J/kg/K", "kind": "constant", "source": "seawater specific heat" },
+    "rho_ice": { "value": 917.0, "unit": "kg/m3", "kind": "constant", "source": "ice density" },
+    "k_ice": { "value": 2.0, "unit": "W/m/K", "kind": "constant", "source": "thermal conductivity of sea ice (Maykut & Untersteiner 1971)" },
+    "t_freeze_sea": { "value": -1.8, "unit": "C", "kind": "constant", "source": "freezing point of seawater at 35 psu" },
+    "lapse_rate": { "value": 0.0065, "unit": "K/m", "kind": "empirical", "source": "ICAO standard atmosphere environmental lapse rate" }
+  },
+  "radiation": {
+    "olr_a": { "value": 203.3, "unit": "W/m2", "kind": "empirical", "source": "Budyko OLR = A + B T (T in C), satellite regression, North, Cahalan & Coakley 1981" },
+    "olr_b": { "value": 2.09, "unit": "W/m2/K", "kind": "empirical", "source": "North, Cahalan & Coakley 1981 (all-sky, includes water-vapour feedback)" },
+    "brutsaert_coef": { "value": 1.24, "unit": "", "kind": "empirical", "source": "Clear-sky atmospheric emissivity 1.24 (e/T)^(1/7) with e in hPa, T in K (Brutsaert 1975)" },
+    "stefan_boltzmann": { "value": 5.67e-8, "unit": "W/m2/K4", "kind": "constant", "source": "Stefan-Boltzmann constant" },
+    "co2_ref": { "value": 345.0, "unit": "ppm", "kind": "empirical", "source": "CO2 around 1980, the epoch of the OLR regression above" },
+    "co2_forcing_coef": { "value": 5.35, "unit": "W/m2", "kind": "empirical", "source": "Myhre et al. 1998: dF = 5.35 ln(C/C0)" },
+    "cloud_lw_coef": { "value": 45.0, "unit": "W/m2", "kind": "empirical", "source": "CERES: LW cloud forcing ~25-30 W/m2 at ~0.6 cover globally, up to 60-80 over deep convection; per unit anomaly of cover" },
+    "cloud_albedo": { "value": 0.36, "unit": "", "kind": "tunable", "source": "Calibrated so present-day global planetary albedo is ~0.29-0.30 (CERES/ERBE)" },
+    "clear_sky_albedo_atm": { "value": 0.07, "unit": "", "kind": "empirical", "source": "Rayleigh + aerosol clear-sky reflectance over dark ocean (~0.06-0.08, ERBE clear-sky)" },
+    "ozone_absorption": { "value": 0.03, "unit": "", "kind": "empirical", "source": "Fraction of incoming solar absorbed by stratospheric ozone ~0.03 (Lacis & Hansen 1974)" },
+    "cloud_absorption": { "value": 0.05, "unit": "", "kind": "empirical", "source": "Solar absorption within cloud layers ~0.03-0.08 of incident (Stephens 1978)" },
+    "vapour_path_factor": { "value": 1.66, "unit": "", "kind": "empirical", "source": "Diffusivity/slant-path magnification of the vapour column for solar absorption (Lacis & Hansen 1974 use 1/mu; 1.66 is the standard mean)" },
+    "albedo_desert": { "value": 0.33, "unit": "", "kind": "empirical", "source": "Bright sand deserts 0.30-0.40 (Hartmann, Global Physical Climatology, table 4.2)" },
+    "albedo_forest": { "value": 0.13, "unit": "", "kind": "empirical", "source": "Tropical/boreal forest 0.12-0.15 (Hartmann table 4.2)" },
+    "albedo_snow": { "value": 0.75, "unit": "", "kind": "empirical", "source": "Old to fresh snow 0.55-0.85 (Hartmann table 4.2)" },
+    "albedo_snow_forest": { "value": 0.30, "unit": "", "kind": "empirical", "source": "Snow-covered boreal forest 0.2-0.4 (Betts & Ball 1997)" },
+    "albedo_glacier": { "value": 0.75, "unit": "", "kind": "empirical", "source": "Ice-sheet surface (Greenland/Antarctica dry snow zone 0.75-0.85)" },
+    "albedo_sea_ice": { "value": 0.60, "unit": "", "kind": "empirical", "source": "Snow-covered sea ice 0.5-0.7 (Perovich 1996)" }
+  },
+  "transport": {
+    "diffusivity": { "value": 1.06e6, "unit": "m2/s", "kind": "empirical", "source": "Eddy diffusivity of moist static energy fitted to observed heat transport, Hwang & Frierson 2010. Applied to moist static energy h = cp T + L RH qsat(T); the explicit moisture model uses the equivalent vapour diffusivity D·(p/g)/(rho_a·H_q)" },
+    "rh_mse": { "value": 0.8, "unit": "", "kind": "empirical", "source": "Near-surface relative humidity defining moist static energy in the diffusive EBM, Hwang & Frierson 2010" },
+    "advection_factor": { "value": 0.5, "unit": "", "kind": "tunable", "source": "Efficiency with which the rotational surface wind advects the column temperature (surface air is partly decoupled from the mean flow by the boundary layer). Calibrated on present-day land seasonal range and monthly T RMSE vs ERA-Interim: 1.0 gave RMSE 5.56 C / range bias -5.3 C; 0.5 gave 5.47 C / -3.5 C" },
+    "ocean_mixed_layer": { "value": 60.0, "unit": "m", "kind": "empirical", "source": "Global mean ocean mixed-layer depth ~50-70 m (de Boyer Montegut et al. 2004)" },
+    "land_heat_capacity": { "value": 6.0e6, "unit": "J/m2/K", "kind": "empirical", "source": "Soil volumetric heat capacity ~2.5e6 J/m3/K over the ~2.5 m annual thermal penetration depth, weighted for its decay with depth (Hartmann ch. 4)" },
+    "ice_surface_heat_capacity": { "value": 2.0e6, "unit": "J/m2/K", "kind": "empirical", "source": "Upper ~1 m of snow/ice on sea ice (2e6 J/m3/K) responding on seasonal time scales" },
+    "heat_exchange_ocean": { "value": 1.1e-3, "unit": "", "kind": "empirical", "source": "Bulk sensible-heat coefficient C_H over ocean (Large & Pond 1982)" },
+    "heat_exchange_land": { "value": 3.0e-3, "unit": "", "kind": "empirical", "source": "Bulk sensible-heat coefficient over rougher land surfaces 2-5e-3 (Garratt 1992)" },
+    "ocean_diffusivity": { "value": 5.0e3, "unit": "m2/s", "kind": "empirical", "source": "Mesoscale eddy diffusivity of the upper ocean 1e3-1e4 m2/s (Abernathey & Marshall 2013)" },
+    "gyre_heat_efficiency": { "value": 0.3, "unit": "", "kind": "tunable", "source": "Fraction of the barotropic gyre transport that carries mixed-layer temperature contrasts; calibrated to ~1 PW wind-driven ocean heat transport (Trenberth & Caron 2001)" },
+    "ocean_drag": { "value": 1.3e-3, "unit": "", "kind": "empirical", "source": "Neutral 10 m drag coefficient over ocean (Large & Pond 1981)" },
+    "stommel_width": { "value": 2.5, "unit": "cells", "kind": "numerical", "source": "Stommel western-boundary-layer width r/beta must be resolved by the grid; set to a few grid spacings (the real current is narrower)" },
+    "ocean_depth": { "value": 4000.0, "unit": "m", "kind": "empirical", "source": "Mean ocean depth ~3700-4000 m" }
+  },
+  "circulation": {
+    "ridge_lat": { "value": 30.0, "unit": "deg", "kind": "empirical", "source": "Annual-mean latitude of the subtropical high-pressure ridge (~30 deg, Peixoto & Oort 1992)" },
+    "ridge_shift": { "value": 0.6, "unit": "deg/deg", "kind": "empirical", "source": "Seasonal ridge migration (~27-38 N) relative to ITCZ migration (~-5 to +10), Peixoto & Oort 1992" },
+    "subpolar_lat": { "value": 62.0, "unit": "deg", "kind": "empirical", "source": "Latitude of the subpolar low-pressure trough (~60-65 deg)" },
+    "itcz_anom": { "value": -6.0, "unit": "hPa", "kind": "empirical", "source": "Equatorial trough ~1007-1010 hPa relative to 1013 hPa" },
+    "ridge_anom": { "value": 7.0, "unit": "hPa", "kind": "empirical", "source": "Subtropical highs ~1018-1022 hPa (zonal mean over ocean)" },
+    "subpolar_anom": { "value": -15.0, "unit": "hPa", "kind": "empirical", "source": "Subpolar lows ~990-1000 hPa over ocean (Aleutian, Icelandic, circumpolar trough)" },
+    "polar_anom": { "value": 3.0, "unit": "hPa", "kind": "empirical", "source": "Polar highs ~1015-1020 hPa" },
+    "thermal_pressure_coef": { "value": 0.6, "unit": "hPa/K", "kind": "empirical", "source": "Hypsometric response of surface pressure to a 1.5 km boundary-layer temperature anomaly: p g H/(R T^2) ~ 0.6 hPa/K" },
+    "cross_isobar_ocean": { "value": 25.0, "unit": "deg", "kind": "empirical", "source": "Surface cross-isobar angle over ocean 15-30 deg (Stull 1988)" },
+    "cross_isobar_land": { "value": 40.0, "unit": "deg", "kind": "empirical", "source": "Surface cross-isobar angle over land 30-50 deg (Stull 1988)" },
+    "equatorial_friction": { "value": 1.2e-5, "unit": "1/s", "kind": "empirical", "source": "Boundary-layer momentum damping ~1/day where Coriolis vanishes (Lindzen & Nigam 1987)" },
+    "boundary_layer_depth": { "value": 1000.0, "unit": "m", "kind": "empirical", "source": "Depth of the frictional (Ekman) boundary layer ~1 km (Stull 1988); only vapour in this layer moves with the cross-isobar component" },
+    "gustiness": { "value": 4.0, "unit": "m/s", "kind": "empirical", "source": "Transient/gust contribution to mean scalar wind speed in bulk flux formulas (Godfrey & Beljaars 1991)" }
+  },
+  "hydro": {
+    "exchange_coef": { "value": 1.2e-3, "unit": "", "kind": "empirical", "source": "Bulk moisture exchange coefficient C_E over ocean (Large & Pond 1982)" },
+    "rh_surface_ocean": { "value": 0.8, "unit": "", "kind": "empirical", "source": "Near-surface relative humidity over oceans ~0.75-0.8 (Dai 2006)" },
+    "rh_surface_land": { "value": 0.65, "unit": "", "kind": "empirical", "source": "Near-surface relative humidity over vegetated land ~0.6-0.7 (Dai 2006)" },
+    "vapour_scale_height": { "value": 2700.0, "unit": "m", "kind": "empirical", "source": "Water-vapour scale height ~2-3 km; 2.7 km gives saturated column ~70 mm at 300 K as in Bretherton et al. 2004" },
+    "precip_crh_a": { "value": 15.6, "unit": "", "kind": "empirical", "source": "Precipitation vs column relative humidity P = exp(a(r-b)) mm/day, Bretherton, Peters & Back 2004" },
+    "precip_crh_b": { "value": 0.603, "unit": "", "kind": "empirical", "source": "Bretherton, Peters & Back 2004" },
+    "orographic_efficiency": { "value": 0.5, "unit": "", "kind": "tunable", "source": "Fraction of the vapour blocked by rising terrain (the part of the column below the height step) that is lifted and precipitates on the windward side (drying ratio 20-50%, Smith 1979; Kirshbaum & Smith 2008); calibrated on windward/leeward precipitation ratios" },
+    "bucket_capacity": { "value": 150.0, "unit": "kg/m2", "kind": "empirical", "source": "Manabe 1969 soil-moisture bucket, 15 cm field capacity" },
+    "snow_rain_low": { "value": -2.0, "unit": "C", "kind": "empirical", "source": "All precipitation falls as snow below ~-2 C, as rain above ~+2 C (Dai 2008)" },
+    "snow_rain_high": { "value": 2.0, "unit": "C", "kind": "empirical", "source": "Dai 2008" },
+    "degree_day_factor": { "value": 4.0, "unit": "kg/m2/K/day", "kind": "empirical", "source": "Snow melt degree-day factor 3-5 mm/K/day (Braithwaite 1995)" },
+    "snow_cover_half": { "value": 30.0, "unit": "kg/m2", "kind": "empirical", "source": "Snow water equivalent at which ground is ~half covered (~10-15 cm snow depth; Roesch et al. 2001)" },
+    "glacier_swe": { "value": 2000.0, "unit": "kg/m2", "kind": "numerical", "source": "Perennial snowpack above 2 m water equivalent is treated as glacier ice (albedo and no vegetation)" }
+  },
+  "cloud": {
+    "cover_base_ocean": { "value": 0.55, "unit": "", "kind": "tunable", "source": "Non-precipitating (trade-cumulus/stratocumulus) cover over ocean; ISCCP subtropical oceans ~0.5-0.6; calibrated with cloud_albedo to global cover ~0.65 and planetary albedo ~0.29" },
+    "cover_base_land": { "value": 0.25, "unit": "", "kind": "tunable", "source": "Non-precipitating cover over land; ISCCP subtropical deserts ~0.2-0.3" },
+    "cover_precip_scale": { "value": 3.0, "unit": "mm/day", "kind": "tunable", "source": "Precipitation rate at which cover approaches saturation exponentially; calibrated on ITCZ/storm-track cover ~0.8 (ISCCP)" },
+    "cover_max": { "value": 0.85, "unit": "", "kind": "empirical", "source": "Maximum monthly-mean cover in storm tracks and ITCZ ~0.8-0.9 (ISCCP)" },
+    "cover_mean": { "value": 0.65, "unit": "", "kind": "empirical", "source": "Global mean cloud cover (ISCCP D2), reference for cloud LW anomaly" }
+  },
+  "vegetation": {
+    "grass_response_time": { "value": 5.0, "unit": "yr", "kind": "empirical", "source": "Herbaceous cover adjusts to climate within ~5 years (Brovkin, Ganopolski & Svirezhev 1997)" },
+    "forest_response_time": { "value": 50.0, "unit": "yr", "kind": "empirical", "source": "Forest establishment/dieback time scale ~50 years (Brovkin, Ganopolski & Svirezhev 1997)" },
+    "treeline_warmest_month": { "value": 10.0, "unit": "C", "kind": "empirical", "source": "Polar/alpine treeline near the 10 C warmest-month isotherm (Köppen 1936)" }
+  },
+  "numerics": {
+    "steps_per_year": { "value": 24, "unit": "", "kind": "numerical", "source": "Half-month time steps resolve the seasonal cycle" },
+    "spinup_years": { "value": 40, "unit": "yr", "kind": "numerical", "source": "Mixed-layer e-folding ~5 yr and snow/glacier build-up need several decades to reach a periodic state" }
+  }
+}

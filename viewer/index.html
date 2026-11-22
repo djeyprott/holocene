@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Holocene — World Viewer</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand">HOLOCENE <span>world viewer</span></div>
+  <label>Epoch <select id="snapshot"></select></label>
+  <label>Layer <select id="layer"></select></label>
+  <label id="monthWrap">Month <input id="month" type="range" min="0" max="11" value="0"><span id="monthName">Jan</span></label>
+  <label class="chk"><input id="rivers" type="checkbox" checked> rivers</label>
+  <label class="chk"><input id="lakes" type="checkbox" checked> lakes</label>
+  <label class="chk"><input id="winds" type="checkbox"> winds</label>
+  <span id="status"></span>
+</header>
+<main>
+  <div id="mapWrap">
+    <canvas id="map"></canvas>
+    <div id="legend"></div>
+    <div id="hover"></div>
+  </div>
+  <aside id="panel">
+    <div id="epochInfo"></div>
+    <div id="cellInfo"><p class="hint">Click the map to inspect a place.</p></div>
+  </aside>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

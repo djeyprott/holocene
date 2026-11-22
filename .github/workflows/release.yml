@@ -1,0 +1,61 @@
+name: Release
+
+# Push a tag like v0.1.0 to build self-contained executables for every platform and publish a GitHub Release.
+# "Run workflow" on the Actions tab builds the same packages as downloadable workflow artifacts without releasing.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rid: [win-x64, linux-x64, osx-x64, osx-arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Test
+        run: dotnet run -c Release --project tests/Holocene.Tests
+      - name: Publish self-contained executable
+        run: >
+          dotnet publish src/Holocene.Cli -c Release -r ${{ matrix.rid }} --self-contained true
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none
+          -o out/bin
+      - name: Assemble package
+        run: |
+          name=holocene-${GITHUB_REF_NAME#v}-${{ matrix.rid }}
+          [ "$GITHUB_REF_TYPE" = "tag" ] || name=holocene-dev-${{ matrix.rid }}
+          mkdir -p "pkg/$name/data"
+          cp out/bin/* "pkg/$name/"
+          cp -r data/parameters.json data/earth data/validation "pkg/$name/data/"
+          cp -r viewer docs README.md "pkg/$name/"
+          cd pkg
+          if [[ "${{ matrix.rid }}" == win-* ]]; then zip -qr "$name.zip" "$name"; else chmod +x "$name/holocene"; tar czf "$name.tar.gz" "$name"; fi
+          echo "PKG_NAME=$name" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PKG_NAME }}
+          path: pkg/${{ env.PKG_NAME }}.*
+          if-no-files-found: error
+
+  release:
+    if: github.ref_type == 'tag'
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --title "Holocene $GITHUB_REF_NAME" --notes "Self-contained builds (no .NET install needed). Unpack and run \`holocene\` (Windows: holocene.exe) to open the world viewer; run \`holocene help\` for the simulation commands. macOS: if Gatekeeper blocks the unsigned binary, right-click it and choose Open, or run \`xattr -d com.apple.quarantine holocene\`."

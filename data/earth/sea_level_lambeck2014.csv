@@ -1,0 +1,22 @@
+# Global mean (ice-volume equivalent) sea level relative to present, metres.
+# APPROXIMATE digitization of the ESL curve in Lambeck et al. 2014, PNAS 111:15296 (fig. 4), to be replaced by
+# the published table when available. Earth-mode forcing until the ice-sheet model computes sea level itself.
+age_bp,sea_level_m
+21000,-130
+19000,-125
+16500,-110
+14600,-96
+14300,-82
+13000,-73
+12500,-68
+12000,-63
+11500,-59
+11000,-52
+10000,-42
+9000,-30
+8000,-17
+7000,-5
+6000,-2
+4000,-0.7
+2000,-0.2
+0,0
